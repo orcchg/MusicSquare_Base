@@ -11,7 +11,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
-class Api {
+object Api {
 
     /* Common */
     // --------------------------------------------------------------------------------------------
@@ -63,5 +63,13 @@ class Api {
     fun provideRestAdapter(retrofit: Retrofit.Builder): RestAdapter {
         return retrofit.baseUrl(RestAdapter.ENDPOINT).build()
                 .create(RestAdapter::class.java)
+    }
+
+    // ------------------------------------------
+    fun provideCloud(): RestAdapter {
+        return provideRestAdapter(provideRetrofit(provideGson(),
+                provideOkHttpClient(provideRequestHeaderInterceptor(),
+                                    provideResponseHeaderInterceptor(),
+                                    provideHttpLoggingInterceptor())))
     }
 }
