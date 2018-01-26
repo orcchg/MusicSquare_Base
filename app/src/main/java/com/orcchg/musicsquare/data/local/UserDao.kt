@@ -17,4 +17,7 @@ interface UserDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun addUsers(users: List<User>)
+
+    @Query("SELECT COUNT(*) FROM ${User.TABLE_NAME}")
+    fun totalUsers(): Int
 }

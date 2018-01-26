@@ -8,11 +8,6 @@ import butterknife.ButterKnife
 import com.orcchg.musicsquare.R
 import com.orcchg.musicsquare.data.UserRepository
 import com.orcchg.musicsquare.data.remote.Api
-import com.orcchg.musicsquare.domain.User
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import timber.log.Timber
 
 class UserListActivity : BaseActivity() {
 
@@ -36,20 +31,7 @@ class UserListActivity : BaseActivity() {
 
     override fun onStart() {
         super.onStart()
-        repository.users(object : Callback<List<User>> {
-            override fun onResponse(call: Call<List<User>>, response: Response<List<User>>) {
-                val users = response.body()
-                if (users != null) {
-                    adapter.items = users
-                } else {
-                    Timber.e("Failed to get users")
-                }
-            }
-
-            override fun onFailure(call: Call<List<User>>, t: Throwable) {
-                Timber.e(t, "Network error")
-            }
-        })
+        repository.users { adapter.items = it }
     }
 
     // --------------------------------------------------------------------------------------------
