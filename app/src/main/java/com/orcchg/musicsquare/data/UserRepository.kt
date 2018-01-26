@@ -3,38 +3,25 @@ package com.orcchg.musicsquare.data
 import com.orcchg.musicsquare.data.local.UserDao
 import com.orcchg.musicsquare.data.remote.RestAdapter
 import com.orcchg.musicsquare.domain.User
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import io.reactivex.Flowable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 
 class UserRepository(val cloud: RestAdapter, val local: UserDao) {
 
-    fun user(userId: Int, l: (user: User) -> Unit) {
-        Thread { l.invoke(local.user(userId)) }.start()
-    }
+    fun user(userId: Int) = local.user(userId)
 
-    fun users(l: (users: List<User>) -> Unit) {
-        Thread {
-            if (local.totalUsers() > 0) {
-                l.invoke(local.users())
-            } else {
-                cloud.users().enqueue(object : Callback<List<User>> {
-                    override fun onResponse(call: Call<List<User>>, response: Response<List<User>>) {
-                        val users = response.body()
-                        if (users != null) {
-                            local.addUsers(users)
-                            l.invoke(local.users())
-                        } else {
-                            Timber.e("Failed to get users")
-                        }
-                    }
+    fun users(): Flowable<List<User>> =
+        local.totalUsers()
+                .flatMap {
+                    val net = if (it > 0) Flowable.empty<List<User>>()
+                              else cloud.users()
+                                        .doOnNext(local::addUsers)
+                                        .doOnError(Timber::e)
 
-                    override fun onFailure(call: Call<List<User>>, t: Throwable) {
-                        Timber.e(t, "Network error")
-                    }
-                })
-            }
-        }.start()
-    }
+                    Flowable.concatArrayEager(local.users(), net)
+                }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
 }

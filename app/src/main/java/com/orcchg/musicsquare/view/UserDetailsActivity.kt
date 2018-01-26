@@ -42,9 +42,9 @@ class UserDetailsActivity : BaseActivity() {
         super.onStart()
         val userId = intent.getIntExtra(EXTRA_USER_ID, -1)
 
-        repository.user(userId, {
+        repository.user(userId).subscribe {
             image.setImageURI(Uri.parse(it.avatar_url))
             title.text = it.login
-        })
+        }
     }
 }

@@ -1,7 +1,7 @@
 package com.orcchg.musicsquare.data.remote
 
 import com.orcchg.musicsquare.domain.User
-import retrofit2.Call
+import io.reactivex.Flowable
 import retrofit2.http.GET
 import retrofit2.http.Path
 
@@ -12,8 +12,8 @@ interface RestAdapter {
     }
 
     @GET("user/{userId}")
-    fun user(@Path("userId") userId: Int): Call<User>
+    fun user(@Path("userId") userId: Int): Flowable<User>
 
     @GET("users")
-    fun users(): Call<List<User>>
+    fun users(): Flowable<List<User>>
 }
