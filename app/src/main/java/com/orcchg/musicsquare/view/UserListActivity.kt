@@ -26,7 +26,7 @@ class UserListActivity : BaseActivity() {
         setContentView(R.layout.activity_user_list)
         ButterKnife.bind(this)
 
-        repository = UserRepository(Api.provideCloud())
+        repository = UserRepository(Api.provideCloud(), Api.provideDatabase(applicationContext))
 
         adapter = UserListAdapter { userId, _ -> openUserDetails(userId) }
 

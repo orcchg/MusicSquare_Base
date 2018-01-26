@@ -40,7 +40,7 @@ class UserDetailsActivity : BaseActivity() {
         setContentView(R.layout.activity_user_details)
         ButterKnife.bind(this)
 
-        repository = UserRepository(Api.provideCloud())
+        repository = UserRepository(Api.provideCloud(), Api.provideDatabase(applicationContext))
     }
 
     override fun onStart() {

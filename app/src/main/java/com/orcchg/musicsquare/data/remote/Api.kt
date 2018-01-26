@@ -1,10 +1,12 @@
 package com.orcchg.musicsquare.data.remote
 
+import android.content.Context
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.ihsanbal.logging.Level
 import com.ihsanbal.logging.LoggingInterceptor
 import com.orcchg.musicsquare.BuildConfig
+import com.orcchg.musicsquare.data.local.UserDatabase
 import okhttp3.OkHttpClient
 import okhttp3.internal.platform.Platform
 import retrofit2.Retrofit
@@ -72,4 +74,6 @@ object Api {
                                     provideResponseHeaderInterceptor(),
                                     provideHttpLoggingInterceptor())))
     }
+
+    fun provideDatabase(context: Context) = UserDatabase.build(context).userDao()
 }
