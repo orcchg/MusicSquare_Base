@@ -11,27 +11,30 @@ import timber.log.Timber
 class UserRepository(val cloud: RestAdapter, val local: UserDao) {
 
     fun user(userId: Int, l: (user: User) -> Unit) {
-        l.invoke(local.user(userId))
+        Thread { l.invoke(local.user(userId)) }.start()
     }
 
-    fun users(l: (users: List<User>) -> Unit) =
-        if (local.totalUsers() > 0) {
-            l.invoke(local.users())
-        } else {
-            cloud.users().enqueue(object : Callback<List<User>> {
-                override fun onResponse(call: Call<List<User>>, response: Response<List<User>>) {
-                    val users = response.body()
-                    if (users != null) {
-                        local.addUsers(users)
-                        l.invoke(local.users())
-                    } else {
-                        Timber.e("Failed to get users")
+    fun users(l: (users: List<User>) -> Unit) {
+        Thread {
+            if (local.totalUsers() > 0) {
+                l.invoke(local.users())
+            } else {
+                cloud.users().enqueue(object : Callback<List<User>> {
+                    override fun onResponse(call: Call<List<User>>, response: Response<List<User>>) {
+                        val users = response.body()
+                        if (users != null) {
+                            local.addUsers(users)
+                            l.invoke(local.users())
+                        } else {
+                            Timber.e("Failed to get users")
+                        }
                     }
-                }
 
-                override fun onFailure(call: Call<List<User>>, t: Throwable) {
-                    Timber.e(t, "Network error")
-                }
-            })
-        }
+                    override fun onFailure(call: Call<List<User>>, t: Throwable) {
+                        Timber.e(t, "Network error")
+                    }
+                })
+            }
+        }.start()
+    }
 }

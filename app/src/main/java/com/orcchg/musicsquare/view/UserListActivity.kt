@@ -31,7 +31,7 @@ class UserListActivity : BaseActivity() {
 
     override fun onStart() {
         super.onStart()
-        repository.users { adapter.items = it }
+        repository.users { items.post { adapter.items = it } }
     }
 
     // --------------------------------------------------------------------------------------------
