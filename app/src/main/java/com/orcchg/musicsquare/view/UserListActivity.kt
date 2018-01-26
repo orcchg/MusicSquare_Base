@@ -18,7 +18,7 @@ class UserListActivity : BaseActivity() {
 
     @BindView(R.id.rv_items) lateinit var items: RecyclerView
 
-    private val adapter = UserListAdapter()
+    private lateinit var adapter: UserListAdapter
     private lateinit var repository: UserRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,6 +28,8 @@ class UserListActivity : BaseActivity() {
 
         repository = UserRepository(Api.provideCloud())
 
+        adapter = UserListAdapter { userId, _ -> openUserDetails(userId) }
+
         items.adapter = adapter
         items.layoutManager = LinearLayoutManager(this)
     }
@@ -36,12 +38,22 @@ class UserListActivity : BaseActivity() {
         super.onStart()
         repository.users(object : Callback<List<User>> {
             override fun onResponse(call: Call<List<User>>, response: Response<List<User>>) {
-                adapter.items = response.body()!!
+                val users = response.body()
+                if (users != null) {
+                    adapter.items = users
+                } else {
+                    Timber.e("Failed to get users")
+                }
             }
 
             override fun onFailure(call: Call<List<User>>, t: Throwable) {
-                Timber.e(t, "Failed to get users")
+                Timber.e(t, "Network error")
             }
         })
+    }
+
+    // --------------------------------------------------------------------------------------------
+    private fun openUserDetails(userId: Int) {
+        startActivity(UserDetailsActivity.getCallingIntent(this, userId))
     }
 }

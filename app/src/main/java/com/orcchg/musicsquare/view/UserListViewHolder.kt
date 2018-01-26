@@ -10,7 +10,7 @@ import com.facebook.drawee.view.SimpleDraweeView
 import com.orcchg.musicsquare.R
 import com.orcchg.musicsquare.domain.User
 
-class UserListViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+class UserListViewHolder(view: View, val l: ((userId: Int, position: Int) -> Unit)?) : RecyclerView.ViewHolder(view) {
 
     @BindView(R.id.iv_image) lateinit var image: SimpleDraweeView
     @BindView(R.id.tv_title) lateinit var title: TextView
@@ -21,6 +21,7 @@ class UserListViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     }
 
     fun bind(model: User) {
+        itemView.setOnClickListener { l?.invoke(model.id, adapterPosition) }
         image.setImageURI(Uri.parse(model.avatar_url))
         title.text = model.login
         description.text = model.name
